@@ -9,6 +9,7 @@ class Mastermind
     @code = Array.new(4)
     @guess_number = 0
     @guesses = Array.new(12) {Array.new(4)}
+    @feedback = Array.new(12) {Array.new(4)}
   end
 
   def code
@@ -19,8 +20,16 @@ class Mastermind
     @guess_number
   end
 
+  def increase_guess_number
+    @guess_number += 1
+  end
+
   def guesses
     @guesses
+  end
+
+  def feedback
+    @feedback
   end
 
   def computer_new_code
@@ -32,7 +41,6 @@ class Mastermind
   end
 
   def choose_pegs
-    @guess_number += 1
     4.times do |i|
       puts "Colour #{i+1}:"
       selection = gets.chomp.upcase
@@ -42,18 +50,44 @@ class Mastermind
       end
       @guesses[self.guess_number-1][i] = selection
     end
-    
+  end
+
+  def generate_feedback
+    4.times do |i|
+      if !self.code.include?(@guesses[self.guess_number-1][i])
+        @feedback[self.guess_number-1][i] = ""
+        next
+      elsif self.code[i] == @guesses[self.guess_number-1][i]
+        @feedback[self.guess_number-1][i] = "▓" 
+        next
+      elsif self.code.include?(@guesses[self.guess_number-1][i])
+        @feedback[self.guess_number-1][i] = "░"
+      end
+    end
   end
 
 end
 
 game = Mastermind.new()
 game.computer_new_code
-game.choose_pegs
-p game.guess_number
-game.choose_pegs
-p game.guess_number
+
 p game.code
+
+game.increase_guess_number
+p game.guess_number
+game.choose_pegs
 p game.guesses
+game.generate_feedback
+p game.feedback
+
+game.increase_guess_number
+p game.guess_number
+game.choose_pegs
+p game.guesses
+game.generate_feedback
+p game.feedback
+
+
+
 
 
