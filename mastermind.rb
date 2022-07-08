@@ -9,7 +9,7 @@ class Mastermind
     @code = Array.new(4)
     @guess_number = 0
     @guesses = Array.new(12) {Array.new(4)}
-    @feedback = Array.new(12) {Array.new(4)}
+    @feedback = Array.new(12) {Array.new}
   end
 
   def code
@@ -47,7 +47,7 @@ class Mastermind
     puts "│ #{self.feedback[guess_number][2]} │ #{self.feedback[guess_number][3]} │"
     puts "╰───┴───╯"
   end
-
+  
   def feedback
     @feedback
   end
@@ -77,18 +77,37 @@ class Mastermind
   end
 
   def generate_feedback
+    temp_code = self.code.dup 
+    temp_guess = @guesses[self.guess_number-1].dup
+    correct_spot = Array.new()
     4.times do |i|
-      if !self.code.include?(@guesses[self.guess_number-1][i])
-        @feedback[self.guess_number-1][i] = "◯"
-        next
-      elsif self.code[i] == @guesses[self.guess_number-1][i]
-        @feedback[self.guess_number-1][i] = "▓" 
-        next
-      elsif self.code.include?(@guesses[self.guess_number-1][i])
-        @feedback[self.guess_number-1][i] = "░"
+      if temp_code[i] == temp_guess[i]
+        @feedback[self.guess_number-1].push("▓")
+        temp_code[i] = ''
+        correct_spot.push(i)
+        # p correct_spot
+        # p @feedback[self.guess_number-1]
+        # p @feedback[self.guess_number-1].length
+
       end
     end
-    #@feedback[self.guess_number-1].shuffle!
+    # p temp_code
+    
+    correct_spot.each {|position| temp_guess.delete_at(position)}
+    # p temp_guess
+    temp_guess.each do |colour|
+      if temp_code.include?(colour)
+        @feedback[self.guess_number-1].push("░")
+        # p @feedback[self.guess_number-1]
+        # p @feedback[self.guess_number-1].length
+        temp_code.delete(colour)
+      end
+    end
+    (4-@feedback[self.guess_number-1].length).times do
+      @feedback[self.guess_number-1].push(' ')
+      # p @feedback[self.guess_number-1].length
+    end
+    @feedback[self.guess_number-1].shuffle!
   end
 
 end
@@ -102,10 +121,11 @@ while game.guess_number < 12
   game.increase_guess_number
   puts '', "** GUESS NUMBER #{game.guess_number} of 12 **"
   game.choose_pegs
+  puts ''
   game.show_this_guess(game.guess_number - 1)
   game.generate_feedback
   game.show_this_feedback(game.guess_number - 1)
-  game.show_code
+  # game.show_code
   if game.guess_right?
     puts '', "You solved it with just #{game.guess_number} guesses! Congratulations!", ''
     break
@@ -114,3 +134,4 @@ end
 
 puts '', '*** CODE ***'
 game.show_code
+puts ''
