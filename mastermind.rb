@@ -1,5 +1,5 @@
 class Mastermind
-  attr_reader :code_pegs, :code, :guess_number, :guesses, :feedback, :role
+  attr_reader :code_pegs, :code, :guess_number, :guesses, :feedback, :role, :possible_codes
 
   @@code_pegs = { 1 => 'R', 2 => 'G', 3 => 'B', 4 => 'C', 5 => 'M', 6 => 'Y' }
 
@@ -10,7 +10,16 @@ class Mastermind
     @code = Array.new(4)
     @guess_number = 0
     @guesses = Array.new(12) { Array.new(4) }
-    @feedback = Array.new(12) { [] }
+    @feedback = []
+    @possible_codes = @@code_pegs.values.repeated_permutation(4).to_a
+  end
+
+  def guesses
+    @guesses
+  end
+
+  def feedback
+    @feedback
   end
 
   def show_code
@@ -81,13 +90,14 @@ class Mastermind
     end
   end
 
-  def generate_feedback
+  def generate_feedback(guess)
     temp_code = self.code.dup
-    temp_guess = @guesses[self.guess_number - 1].dup
+    temp_guess = guess.dup
     correct_spot = Array.new
+    one_feedback = []
     4.times do |i|
       if temp_code[i] == temp_guess[i]
-        @feedback[self.guess_number - 1].push('▓')
+        one_feedback.push('▓')
         temp_code[i] = ''
         correct_spot.push(i)
       end
@@ -95,14 +105,14 @@ class Mastermind
     correct_spot.reverse.each { |position| temp_guess.delete_at(position) }
     temp_guess.each do |colour|
       if temp_code.include?(colour)
-        @feedback[self.guess_number - 1].push('░')
+        one_feedback.push('░')
         temp_code.delete(colour)
       end
     end
-    (4 - @feedback[self.guess_number - 1].length).times do
-      @feedback[self.guess_number - 1].push(' ')
+    (4 - one_feedback.length).times do
+      one_feedback.push(' ')
     end
-    @feedback[self.guess_number - 1].shuffle!
+    one_feedback.shuffle!
   end
 
 end
@@ -123,7 +133,9 @@ while game.guess_number < 12
   game.role == 'b' ? nil : gets
   game.role == 'b' ? game.choose_pegs : game.computer_choose_pegs
   puts ''
-  game.generate_feedback
+  
+  game.feedback.push(game.generate_feedback(game.guesses[game.guess_number - 1]))
+  
   (0..(game.guess_number - 1)).each do |guess|
     puts '-----------------'
     game.show_this_guess(guess)
