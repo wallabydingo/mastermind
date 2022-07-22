@@ -1,5 +1,5 @@
 class Mastermind
-  attr_reader :code_pegs, :code, :guess_number, :guesses, :feedback, :role, :possible_codes
+  attr_reader :code_pegs, :code, :guess_number, :guesses, :feedback, :role, :possible_codes, :computer_guesses
 
   @@code_pegs = { 1 => 'R', 2 => 'G', 3 => 'B', 4 => 'C', 5 => 'M', 6 => 'Y' }
 
@@ -11,6 +11,11 @@ class Mastermind
     @guess_number = 0
     @guesses = Array.new(12) { Array.new(4) }
     @feedback = []
+    @possible_codes = 0
+    @computer_guesses = Hash.new
+  end
+
+  def possible_codes
     @possible_codes = @@code_pegs.values.repeated_permutation(4).to_a
   end
 
@@ -117,6 +122,19 @@ class Mastermind
 
 end
 
+def generate_feedback_possible_codes(codes)
+  all_feedback = []
+  #all_codes = self.possible_codes
+  codes.each do |code|
+    little_feedback = generate_feedback(code)
+    all_feedback.push(little_feedback.sort!)
+  end
+
+  @computer_guesses = all_codes.zip(all_feedback)
+  
+end
+
+
 
 game = Mastermind.new
 
@@ -127,6 +145,18 @@ else
   puts '', 'Set your code...'
   game.human_new_code
 end
+
+#game.possible_codes
+  all_feedback = []
+  all_codes = game.possible_codes
+  all_codes.each do |code|
+    little_feedback = game.generate_feedback(code)
+    all_feedback.push(little_feedback.sort!)
+  end
+
+ @computer_guesses = all_codes.zip(all_feedback)
+ p @computer_guesses.length
+
 while game.guess_number < 12
   game.increase_guess_number
   puts '', "** GUESS NUMBER #{game.guess_number} of 12 **"
@@ -140,8 +170,11 @@ while game.guess_number < 12
     puts '-----------------'
     game.show_this_guess(guess)
     game.show_this_feedback(guess)
+    @computer_guesses.delete_if{|_,v| v == game.feedback[guess].sort}
+    p @computer_guesses.length
   end
-  # game.show_code
+
+  
   if game.guess_right?
     puts '', game.role == 'b' ? 'You' : 'Computer' + " solved it with just #{game.guess_number} guesses! Congratulations!", ''
     break
