@@ -133,6 +133,24 @@ class Mastermind
   
   end
 
+  def update_computer_guesses
+    p self.computer_guesses.length
+    self.computer_guesses.delete_if { |k,v| v == self.feedback[self.guess_number - 1].sort }
+    if self.feedback[self.guess_number - 1].sort[3] == ' '
+      (0..3).each do |posi|
+        self.computer_guesses.delete_if { |k,v| k.include?(self.guesses[self.guess_number - 1][posi]) }
+      end
+      
+    elsif self.feedback[self.guess_number - 1].sort[0] != ' '
+      poss_codes = self.guesses[self.guess_number - 1].permutation(4).to_a
+  
+      self.computer_guesses = self.computer_guesses.slice(*poss_codes)
+      
+    end
+    self.generate_computer_guesses(self.computer_guesses.keys)
+    p self.computer_guesses.length
+  end
+
 end
 
 
@@ -170,10 +188,7 @@ while game.guess_number < 12
     puts '', game.role == 'b' ? 'You' : 'Computer' + " solved it with just #{game.guess_number} guesses! Congratulations!", ''
     break
   end
-  p game.computer_guesses.length
-  game.computer_guesses.delete_if{|_,v| v == game.feedback[game.guess_number - 1].sort}
-  game.generate_computer_guesses(game.computer_guesses.keys)
-  p game.computer_guesses.length
+  game.update_computer_guesses
 end
 
 puts '', '*** CODE ***'
